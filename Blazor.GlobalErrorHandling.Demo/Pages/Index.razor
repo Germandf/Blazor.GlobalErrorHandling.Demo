@@ -1,14 +1,14 @@
 ﻿@page "/"
-@inject WeatherForecastService ForecastService
-@using Blazor.GlobalErrorHandling.Demo.Data;
 
 <PageTitle>Index</PageTitle>
 
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
+<p>This simple app demonstrates different ways of handling exceptions using a CustomErrorBoundary component, inheriting from ErrorBoundary.</p>
 
 <h1>Counter</h1>
+
+<p>If Current count is greater than @maxCount, it will throw an exception handled by the global ErrorBoundary.</p>
 
 <p role="status">Current count: @currentCount</p>
 
@@ -16,49 +16,32 @@ Welcome to your new app.
 
 <h1>Weather forecast</h1>
 
-<p>This component demonstrates fetching data from a service.</p>
+<p>This component demonstrates fetching data from a service. May throw an exception handled by its own ErrorBoundary with a custom ErrorContent.</p>
 
-@if (forecasts == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+<CustomErrorBoundary @ref="errorBoundary">
+    <ChildContent>
+        <WeatherForecasts />
+    </ChildContent>
+    <ErrorContent>
+        <div class="alert alert-danger">
+            <h3>@context.GetType()</h3>
+            <h4>@context.Message</h4>
+            <button class="btn btn-danger" @onclick="() => errorBoundary?.Recover()">Reload</button>
+        </div>
+    </ErrorContent>
+</CustomErrorBoundary>
 
-<button class="btn btn-secondary" @onclick="KillCircuit">Kill Circuit</button>
+<h1>Kill Circuit</h1>
+
+<p>This component provoques an unhandled exception inside ErrorBoundary component.</p>
+
+<button class="btn btn-secondary" @onclick="KillCircuit">Kill</button>
 
 @code {
 
     private int currentCount = 0;
     private int maxCount = 3;
-    private WeatherForecast[]? forecasts;
-
-    protected override async Task OnInitializedAsync()
-    {
-        forecasts = await ForecastService.GetForecastAsync(DateOnly.FromDateTime(DateTime.Now));
-    }
+    private CustomErrorBoundary? errorBoundary;
 
     private void IncrementCount()
     {

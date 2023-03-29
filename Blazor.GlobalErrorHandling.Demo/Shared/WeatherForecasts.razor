@@ -1,0 +1,54 @@
+﻿@using Blazor.GlobalErrorHandling.Demo.Data;
+@inject WeatherForecastService ForecastService
+
+@if (forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in forecasts)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@forecast.TemperatureF</td>
+                    <td>@forecast.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button class="btn btn-info" @onclick="ReloadForecasts">Reload</button>
+    <button class="btn btn-danger" @onclick="ThrowException">Throw Exception</button>
+}
+
+@code {
+
+    private WeatherForecast[]? forecasts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadForecasts();
+    }
+
+    private async Task ReloadForecasts()
+    {
+        forecasts = await ForecastService.GetForecastAsync(DateOnly.FromDateTime(DateTime.Now));
+    }
+
+    private void ThrowException()
+    {
+        throw new NotImplementedException("Exception throwed on purpose.");
+    }
+
+}
