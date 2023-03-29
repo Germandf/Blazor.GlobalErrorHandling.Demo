@@ -30,6 +30,11 @@ else
 
     protected override Task OnErrorAsync(Exception exception)
     {
+        if (exception.Message is "Kill!")
+        {
+            throw exception;
+        }
+
         receivedExceptions.Add(exception);
         Logger.LogError(exception, "Error catched by {0}", nameof(CustomErrorBoundary));
         return base.OnErrorAsync(exception);
